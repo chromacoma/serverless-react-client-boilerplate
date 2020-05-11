@@ -1,0 +1,14 @@
+$dark: #343434;
+$light: #e6e6dc;
+$blue: #385f71;
+$red: #b4051e;
+$green: #417b5a;
+
+$font-family-logo: 'Josefin Sans', sans-serif;
+$font-weight-logo: '300';
+
+$alert-legnth: 7000;
+
+:export {
+  alertLength: $alert-legnth;
+}

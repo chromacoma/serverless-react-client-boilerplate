@@ -1,0 +1,18 @@
+.Loader {
+  text-align: center;
+  font-size: 30vw;
+
+  i {
+    color: #eee;
+    animation: spin 2s infinite linear;
+  }
+
+  @keyframes spin {
+    from {
+      transform: scale(1) rotate(0deg);
+    }
+    to {
+      transform: scale(1) rotate(360deg);
+    }
+  }
+}
