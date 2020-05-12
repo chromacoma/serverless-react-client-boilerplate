@@ -64,10 +64,17 @@ const confirmUpdateEmail = (code) => {
   return Auth.verifyCurrentUserAttributeSubmit('email', code);
 };
 
+const challengePassword = async (cognitoUser, newPassword) => {
+  return Auth.completeNewPassword(cognitoUser, newPassword, []).then(
+    (result) => new Promise((resolve, reject) => resolve(result)),
+    (error) => new Promise((resolve, reject) => reject(error))
+  );
+};
+
 const updatePassword = async (oldPassword, newPassword) => {
   const currentUser = Auth.user || (await Auth.currentAuthenticatedUser());
   return Auth.changePassword(currentUser, oldPassword, newPassword).then(
-    (result) => new Promise((resolve, reject) => resolve(result)), // result is just 'SUCCESS' lol
+    (result) => new Promise((resolve, reject) => resolve(result)),
     (error) => new Promise((resolve, reject) => reject(error))
   );
 };
@@ -91,6 +98,7 @@ const userService = {
   update,
   resendUpdateEmailCode,
   confirmUpdateEmail,
+  challengePassword,
   updatePassword,
   delete: _delete,
 };

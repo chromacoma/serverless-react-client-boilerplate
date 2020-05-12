@@ -8,12 +8,14 @@ const initialState = {
   isSigningIn: false,
   isSilentlySigningIn: false,
   isSignedIn: false,
+  isChallenged: false,
   isSigningOut: false,
   isSendingForgotPasswordCode: false,
   isResendingForgotPasswordCode: false,
   isForgotPasswordCodeSent: false,
   isResettingPassword: false,
   isPasswordReset: false,
+  challengeUser: null,
   authUser: null,
   error: null,
 };
@@ -49,7 +51,7 @@ const authenticationReducer = (state = initialState, action) => {
         ...state,
         isResendingSignupCode: false,
       };
-    case userConstants.SIGNUP_RESEND_CODE_REQUEST_FAILURE:
+    case userConstants.SIGNUP_RESEND_CODE_FAILURE:
       return {
         ...state,
         isResendingSignupCode: false,
@@ -79,6 +81,7 @@ const authenticationReducer = (state = initialState, action) => {
         isSigningIn: true,
         isSignedIn: false,
         authUser: null,
+        challengeUser: null,
       };
     case userConstants.SIGNIN_SUCCESS:
       return {
@@ -86,6 +89,13 @@ const authenticationReducer = (state = initialState, action) => {
         isSigningIn: false,
         isSignedIn: true,
         authUser: action.result,
+      };
+    case userConstants.SIGNIN_CHALLENGE:
+      return {
+        ...state,
+        isSigningIn: false,
+        isChallenged: true,
+        challengeUser: action.result,
       };
     case userConstants.SIGNIN_FAILURE:
       return {

@@ -92,18 +92,26 @@ const resendSignupCode = (email) => {
 const signin = (username, password) => {
   const request = () => ({ type: userConstants.SIGNIN_REQUEST });
   const success = (result) => ({ type: userConstants.SIGNIN_SUCCESS, result });
+  const challenge = (result) => ({ type: userConstants.SIGNIN_CHALLENGE, result });
   const failure = (error) => ({ type: userConstants.SIGNIN_FAILURE, error });
 
   return (dispatch) => {
     dispatch(request());
     userService.signin(username, password).then(
       (result) => {
-        const user = result.attributes;
-        const message = "Welcome back! You've been logged in.";
-        dispatch(success(user));
-        dispatch(get());
-        dispatch(push('/dashboard'));
-        dispatch(alertActions.success(message));
+        if (result.challengeName === 'NEW_PASSWORD_REQUIRED') {
+          const user = result;
+          const message = 'Welcome! You need to update your password.';
+          dispatch(challenge(user));
+          dispatch(alertActions.success(message));
+          dispatch(push('/signin/new-password'));
+        } else {
+          const user = result.attributes;
+          const message = "Welcome back! You've been logged in.";
+          dispatch(success(user));
+          dispatch(get());
+          dispatch(alertActions.success(message));
+        }
       },
       (error) => {
         dispatch(failure(error));
@@ -296,33 +304,6 @@ const updateEmail = (user) => {
   };
 };
 
-const updatePassword = (oldPassword, newPassword) => {
-  const request = () => ({ type: userConstants.UPDATE_PASSWORD_REQUEST });
-  const success = (result) => ({ type: userConstants.UPDATE_PASSWORD_SUCCESS, result });
-  const failure = (error) => ({ type: userConstants.UPDATE_PASSWORD_FAILURE, error });
-
-  return (dispatch) => {
-    dispatch(request());
-
-    userService.updatePassword(oldPassword, newPassword).then(
-      (result) => {
-        const message = 'Your password has been updated.';
-        dispatch(alertActions.success(message));
-        dispatch(push('/settings'));
-        dispatch(success(result));
-      },
-      (error) => {
-        const message =
-          error.code === 'NotAuthorizedException'
-            ? 'Sorry, your password is incorrect. Please try again.'
-            : errorMessage(error);
-        dispatch(alertActions.error(message));
-        dispatch(failure(error.toString()));
-      }
-    );
-  };
-};
-
 const resendUpdateEmailCode = (email) => {
   const request = () => ({ type: userConstants.UPDATE_EMAIL_RESEND_CODE_REQUEST });
   const success = (result) => ({ type: userConstants.UPDATE_EMAIL_RESEND_CODE_SUCCESS, result });
@@ -367,6 +348,59 @@ const confirmUpdateEmail = (code) => {
   };
 };
 
+const challengePassword = (cognitoUser, newPassword) => {
+  const request = () => ({ type: userConstants.UPDATE_PASSWORD_REQUEST });
+  const success = (result) => ({ type: userConstants.UPDATE_PASSWORD_SUCCESS, result });
+  const failure = (error) => ({ type: userConstants.UPDATE_PASSWORD_FAILURE, error });
+
+  return (dispatch) => {
+    dispatch(request());
+    userService.challengePassword(cognitoUser, newPassword).then(
+      (result) => {
+        const message = 'Your password has been updated. Log in to continue';
+        dispatch(alertActions.success(message));
+        dispatch(push('/signin'));
+        dispatch(success(result));
+      },
+      (error) => {
+        const message =
+          error.code === 'NotAuthorizedException'
+            ? 'Sorry, your password is incorrect. Please try again.'
+            : errorMessage(error);
+        dispatch(alertActions.error(message));
+        dispatch(failure(error.toString()));
+      }
+    );
+  };
+};
+
+const updatePassword = (oldPassword, newPassword) => {
+  const request = () => ({ type: userConstants.UPDATE_PASSWORD_REQUEST });
+  const success = (result) => ({ type: userConstants.UPDATE_PASSWORD_SUCCESS, result });
+  const failure = (error) => ({ type: userConstants.UPDATE_PASSWORD_FAILURE, error });
+
+  return (dispatch) => {
+    dispatch(request());
+
+    userService.updatePassword(oldPassword, newPassword).then(
+      (result) => {
+        const message = 'Your password has been updated.';
+        dispatch(alertActions.success(message));
+        dispatch(push('/settings'));
+        dispatch(success(result));
+      },
+      (error) => {
+        const message =
+          error.code === 'NotAuthorizedException'
+            ? 'Sorry, your password is incorrect. Please try again.'
+            : errorMessage(error);
+        dispatch(alertActions.error(message));
+        dispatch(failure(error.toString()));
+      }
+    );
+  };
+};
+
 const _delete = () => {
   const request = () => ({ type: userConstants.DELETE_REQUEST });
   const success = (result) => ({ type: userConstants.DELETE_SUCCESS, result });
@@ -403,6 +437,7 @@ const userActions = {
   updateEmail,
   resendUpdateEmailCode,
   confirmUpdateEmail,
+  challengePassword,
   updatePassword,
   delete: _delete,
 };
