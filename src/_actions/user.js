@@ -107,7 +107,7 @@ const signin = (username, password) => {
           dispatch(push('/signin/new-password'));
         } else {
           const user = result.attributes;
-          const message = "Welcome back! You've been logged in.";
+          const message = "Welcome! You've been logged in.";
           dispatch(success(user));
           dispatch(get());
           dispatch(alertActions.success(message));

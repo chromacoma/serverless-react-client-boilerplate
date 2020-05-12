@@ -14,7 +14,6 @@ export default function SignupConfirmation(props) {
   const authentication = useSelector((state) => state.authentication);
   const { isConfirmingSignup, error, authUser } = authentication;
   const email = authUser ? authUser.user.username : null;
-  console.log('SignupConfirmation', authentication, email);
 
   const dispatch = useDispatch();
 
